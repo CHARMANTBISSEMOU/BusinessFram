@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "misAJourLe": "2026-10-31T02:50:27.107Z",
+  "misAJourLe": "2026-10-31T02:52:21.290Z",
   "depots": {
     "BusinessFram": {
       "nom": "BusinessFram",
@@ -8,9 +8,9 @@
       "visibilite": "inconnue",
       "branchePrincipale": "main",
       "dernierCommit": {
-        "hash": "02c31d10cf94770a5fcac526ad74c336855c2346",
-        "sujet": "Initialisation BusinessFram : plan de tâches (29 tâches T-xxx), modélisation UML2 (11 diagrammes) et tableau de suivi HTML",
-        "date": "2026-10-31T02:50:27.107Z"
+        "hash": "5272266fa82278c8148cd517c65cd23b598fb500",
+        "sujet": "gitignore : motifs de fichiers de clés privées + mémoire du gestionnaire",
+        "date": "2026-10-31T02:52:21.289Z"
       },
       "derniereSynchronisation": null,
       "modificationsAPublier": {
@@ -76,6 +76,15 @@
             "statut": "modifications_et_commits_a_publier",
             "commitsAPublier": 1,
             "fichiersEnAttente": 1
+          }
+        },
+        {
+          "date": "2026-10-31T02:52:21.290Z",
+          "operation": "sauvegarderChangements",
+          "statut": "succes",
+          "details": {
+            "hash": "5272266fa82278c8148cd517c65cd23b598fb500",
+            "sujet": "gitignore : motifs de fichiers de clés privées + mémoire du gestionnaire"
           }
         }
       ]
