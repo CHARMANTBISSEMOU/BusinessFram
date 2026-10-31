@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "misAJourLe": "2026-10-31T02:53:26.238Z",
+  "misAJourLe": "2026-10-31T03:02:33.297Z",
   "depots": {
     "BusinessFram": {
       "nom": "BusinessFram",
@@ -8,8 +8,9 @@
       "visibilite": "inconnue",
       "branchePrincipale": "main",
       "dernierCommit": {
-        "hash": "551d9f2f49e9c1a2ffa1629b1a6e58d1fbc96ae0",
-        "date": "2026-10-31T02:53:26.238Z"
+        "hash": "f01e7d2aa1e8e409c48bca066efb6ccf8c4015ff",
+        "sujet": "README : lien direct vers le tableau de suivi (GitHub Pages) + correction du nombre de tâches",
+        "date": "2026-10-31T03:02:33.297Z"
       },
       "derniereSynchronisation": "2026-10-31T02:53:26.238Z",
       "modificationsAPublier": {
@@ -111,6 +112,15 @@
           "details": {
             "branche": "main",
             "commit": "551d9f2f49e9c1a2ffa1629b1a6e58d1fbc96ae0"
+          }
+        },
+        {
+          "date": "2026-10-31T03:02:33.297Z",
+          "operation": "sauvegarderChangements",
+          "statut": "succes",
+          "details": {
+            "hash": "f01e7d2aa1e8e409c48bca066efb6ccf8c4015ff",
+            "sujet": "README : lien direct vers le tableau de suivi (GitHub Pages) + correction du nombre de tâches"
           }
         }
       ]
