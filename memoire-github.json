@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "misAJourLe": "2026-10-31T02:53:04.633Z",
+  "misAJourLe": "2026-10-31T02:53:26.238Z",
   "depots": {
     "BusinessFram": {
       "nom": "BusinessFram",
@@ -8,14 +8,13 @@
       "visibilite": "inconnue",
       "branchePrincipale": "main",
       "dernierCommit": {
-        "hash": "78bc9d0e89a1fc77bf2c93ee69cf44029d4991e6",
-        "sujet": "gitignore : motifs de fichiers de clés privées + mémoire du gestionnaire",
-        "date": "2026-10-31T02:53:04.632Z"
+        "hash": "551d9f2f49e9c1a2ffa1629b1a6e58d1fbc96ae0",
+        "date": "2026-10-31T02:53:26.238Z"
       },
-      "derniereSynchronisation": null,
+      "derniereSynchronisation": "2026-10-31T02:53:26.238Z",
       "modificationsAPublier": {
-        "commits": 1,
-        "fichiers": 1
+        "commits": 0,
+        "fichiers": 0
       },
       "operations": [
         {
@@ -94,6 +93,24 @@
           "details": {
             "hash": "78bc9d0e89a1fc77bf2c93ee69cf44029d4991e6",
             "sujet": "gitignore : motifs de fichiers de clés privées + mémoire du gestionnaire"
+          }
+        },
+        {
+          "date": "2026-10-31T02:53:06.981Z",
+          "operation": "sauvegarderChangements",
+          "statut": "succes",
+          "details": {
+            "hash": "551d9f2f49e9c1a2ffa1629b1a6e58d1fbc96ae0",
+            "sujet": "mémoire du gestionnaire : journal de la première publication de BusinessFram"
+          }
+        },
+        {
+          "date": "2026-10-31T02:53:26.238Z",
+          "operation": "publierModifications",
+          "statut": "succes",
+          "details": {
+            "branche": "main",
+            "commit": "551d9f2f49e9c1a2ffa1629b1a6e58d1fbc96ae0"
           }
         }
       ]

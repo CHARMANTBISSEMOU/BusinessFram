@@ -1,5 +1,9 @@
 # BusinessFram — Plateforme Avicole Intelligente
 
+> ## 📊 [>> CLIQUER ICI POUR OUVRIR LE TABLEAU DE SUIVI DES TÂCHES <<](https://charmantbissemou.github.io/BusinessFram/)
+> Si ce lien ne s'ouvre pas sur votre réseau : téléchargez `index.html` depuis le dépôt
+> (bouton **Code → Download ZIP** ou Raw) et double-cliquez dessus — il fonctionne aussi hors ligne.
+
 Projet collaboratif à **4 développeurs (P1, P2, P3, P4)** : plateforme de gestion d'élevage
 de volailles (poulets de chair **et** poules pondeuses) — saisies quotidiennes, stocks et
 prix, rapports, chat IA et business plans, avec mode **hors ligne** et paiements
@@ -9,7 +13,7 @@ prix, rapports, chat IA et business plans, avec mode **hors ligne** et paiements
 - `index.html` — **tableau de suivi des tâches** (prise en charge par P1-P4, bouton
   « Terminer », commentaires facultatifs). Ouvrable en local ou via GitHub Pages.
 - `etat-suivi.json` — état partagé du suivi, synchronisé par la page HTML.
-- `docs/PLAN_TACHES_PLATEFORME_AVICOLE.md` — plan de développement (25 tâches T-xxx).
+- `docs/PLAN_TACHES_PLATEFORME_AVICOLE.md` — plan de développement (29 tâches T-xxx).
 - `docs/UML2/` — modélisation UML2 (11 diagrammes PlantUML + images SVG/PNG).
 
 ## Organisation de l'équipe
