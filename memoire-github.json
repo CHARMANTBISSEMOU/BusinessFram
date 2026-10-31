@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "misAJourLe": "2026-10-31T02:52:21.290Z",
+  "misAJourLe": "2026-10-31T02:53:04.633Z",
   "depots": {
     "BusinessFram": {
       "nom": "BusinessFram",
@@ -8,9 +8,9 @@
       "visibilite": "inconnue",
       "branchePrincipale": "main",
       "dernierCommit": {
-        "hash": "5272266fa82278c8148cd517c65cd23b598fb500",
+        "hash": "78bc9d0e89a1fc77bf2c93ee69cf44029d4991e6",
         "sujet": "gitignore : motifs de fichiers de clés privées + mémoire du gestionnaire",
-        "date": "2026-10-31T02:52:21.289Z"
+        "date": "2026-10-31T02:53:04.632Z"
       },
       "derniereSynchronisation": null,
       "modificationsAPublier": {
@@ -84,6 +84,15 @@
           "statut": "succes",
           "details": {
             "hash": "5272266fa82278c8148cd517c65cd23b598fb500",
+            "sujet": "gitignore : motifs de fichiers de clés privées + mémoire du gestionnaire"
+          }
+        },
+        {
+          "date": "2026-10-31T02:53:04.633Z",
+          "operation": "sauvegarderChangements",
+          "statut": "succes",
+          "details": {
+            "hash": "78bc9d0e89a1fc77bf2c93ee69cf44029d4991e6",
             "sujet": "gitignore : motifs de fichiers de clés privées + mémoire du gestionnaire"
           }
         }
