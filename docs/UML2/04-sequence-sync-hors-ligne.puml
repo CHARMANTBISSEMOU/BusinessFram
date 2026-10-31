@@ -1,0 +1,42 @@
+@startuml 04-sequence-sync-hors-ligne
+title Séquence — Saisie hors ligne, synchronisation et conflits (UML2)
+autonumber "1."
+actor "Éleveur" as ELE
+participant "App mobile" as M
+participant "File locale\n(SQLite / clé d'idempotence)" as Q
+participant "Moteur de synchronisation" as SYNC
+database "Base serveur" as DB
+
+== Mode hors ligne ==
+ELE -> M : saisit une opération (sans Internet)
+M -> M : bouton « Enregistrer » (aucune écriture sans confirmation)
+M -> Q : file d'attente locale\n(clé d'idempotence UUID, version N)
+
+== Retour du réseau ==
+SYNC -> Q : lit les opérations en attente
+loop pour chaque opération de la file
+  SYNC -> DB : POST /sync (opération, clé, version)
+  DB -> DB : contrôle anti-doublon (clé déjà connue ?)
+  alt clé déjà traitée (doublon)
+    DB --> SYNC : ignorée — déjà enregistrée
+  else version serveur > version locale (conflit)
+    DB --> SYNC : conflit détecté
+    SYNC -> SYNC : applique la règle de résolution\nexplicite (champ par champ,\njournal de résolution conservé)
+    SYNC -> DB : écrit la version résolue
+    DB --> SYNC : accusé de réception
+  else nouvelle opération
+    DB -> DB : écriture + incrémentation de version
+    DB --> SYNC : accusé de réception
+  end
+  SYNC -> Q : retire l'opération de la file
+end
+SYNC --> M : état de synchronisation à jour
+M --> ELE : « Synchronisé » / « Conflit résolu »
+
+note over Q, DB
+  Deux opérations DISTINCTES faites hors ligne
+  sont toujours conservées toutes les deux.
+  Les données locales jamais synchronisées
+  ne sont pas garanties récupérables.
+end note
+@enduml

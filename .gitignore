@@ -1,0 +1,4 @@
+plantuml.jar
+node_modules/
+.env
+*.log

@@ -1,0 +1,49 @@
+@startuml 10-composants
+title Composants — Architecture logicielle (UML2)
+skinparam componentStyle uml2
+
+package "Client mobile (React Native + Expo + TypeScript)" {
+  [UI de saisie\n(fiches, saisies rapides, pondeuses)] as UI
+  [Base locale SQLite\n(file d'attente, clés d'idempotence)] as LOCAL
+  [Client de synchronisation] as CSYNC
+  UI --> LOCAL : écrit / lit
+  LOCAL --> CSYNC
+}
+
+package "Serveur (Node.js + TypeScript)" {
+  [API REST versionnée] as API
+  [Service d'authentification\n(OTP SMS, JWT)] as AUTH
+  [Service de permissions\n(rôles, invitations)] as PERM
+  [Moteur de synchronisation\n(anti-doublons, conflits)] as SYNC
+  [Moteur de stocks\n(achats − consommations,\ninventaire, historique)] as STOCKS
+  [Moteur financier\n(coûts, CA, bénéfice, rentabilité)] as FIN
+  [Service de paiement\n(MTN MoMo / Orange Money)] as PAY
+  [Service IA\n(chat, business plans)] as IA
+  [Générateur de business plans\n(sources vérifiées, jamais inventé)] as BP
+  API --> AUTH
+  API --> PERM
+  API --> SYNC
+  API --> STOCKS
+  API --> FIN
+  API --> PAY
+  API --> BP
+  BP --> IA
+  FIN --> STOCKS
+}
+
+database "PostgreSQL\n(serveur = autorité)" as DB
+[Passerelle SMS] as SMS
+[Opérateurs\nMTN MoMo / Orange Money] as OPS
+[Fournisseur IA externe] as LLM
+
+CSYNC --> SYNC : HTTPS (ou hors ligne)
+SYNC --> DB
+AUTH --> DB
+PERM --> DB
+STOCKS --> DB
+FIN --> DB
+PAY --> DB
+AUTH --> SMS
+PAY --> OPS
+IA --> LLM
+@enduml

@@ -1,0 +1,18 @@
+@startuml 09-etats-synchronisation
+title États — Cycle de vie d'une opération synchronisée (UML2)
+[*] --> Locale : saisie enregistrée (bouton « Enregistrer »)
+Locale : enregistrée sur l'appareil
+Locale --> EnFile : ajout à la file\n(clé d'idempotence UUID)
+EnFile : en attente du réseau
+EnFile --> Synchronisee : retour d'Internet + envoi accepté
+EnFile --> DoublonIgnore : clé déjà connue du serveur
+EnFile --> Conflit : versions concurrentes détectées
+Conflit : modification concurrente\nd'une même donnée
+Conflit --> Resolue : application de la règle\nde résolution explicite
+Resolue : journal de résolution conservé
+Resolue --> Synchronisee
+Synchronisee : présente sur le serveur (autorité)
+Synchronisee --> [*]
+DoublonIgnore : aucune écriture en double
+DoublonIgnore --> [*]
+@enduml

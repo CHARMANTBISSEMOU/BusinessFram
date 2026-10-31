@@ -1,0 +1,19 @@
+@startuml 08-etats-transaction
+title États — Cycle de vie d'une transaction de paiement (UML2)
+[*] --> Initiee : utilisateur choisit un service payant
+Initiee : montant, opérateur (MTN MoMo | Orange Money)
+Initiee --> EnAttenteConfirmation : demande envoyée à l'opérateur
+EnAttenteConfirmation : attente de la confirmation\nsur le téléphone de l'utilisateur
+EnAttenteConfirmation --> Confirmee : callback opérateur\nvérifié par le serveur
+EnAttenteConfirmation --> Echouee : paiement refusé\nou délai dépassé
+EnAttenteConfirmation --> Annulee : annulation de l'utilisateur
+Confirmee : service activé (chat IA ou business plan)\n+ écriture dans l'historique
+Confirmee --> [*]
+Echouee : aucun service activé
+Echouee --> Initiee : nouvelle tentative
+Annulee --> [*]
+note right of Confirmee
+  RÈGLE : aucune activation
+  sans confirmation serveur.
+end note
+@enduml

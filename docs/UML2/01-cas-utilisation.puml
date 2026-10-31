@@ -1,0 +1,82 @@
+@startuml 01-cas-utilisation
+title Diagramme de cas d'utilisation — Plateforme Avicole Intelligente (UML2)
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "Éleveur\n(utilisateur)" as ELE
+actor "PDG\n(administrateur)" as PDG
+actor "Système" as SYS
+actor "Passerelle SMS" as SMS
+actor "Opérateur\nMTN MoMo / Orange Money" as PAY
+actor "Service IA" as IA
+
+rectangle "Plateforme Avicole Intelligente" {
+
+  package "Comptes et accès" {
+    usecase "S'inscrire\n(téléphone + mot de passe)" as UC1
+    usecase "Vérifier le compte par SMS (OTP)" as UC2
+    usecase "Se connecter" as UC3
+    usecase "Récupérer le compte par SMS" as UC4
+    usecase "Configurer le profil\n(après inscription)" as UC5
+  }
+
+  package "Exploitations et lots" {
+    usecase "Créer / gérer une exploitation\n(nom obligatoire, GPS ou manuel)" as UC6
+    usecase "Gérer les bâtiments" as UC7
+    usecase "Créer / gérer un lot\n(âge à l'arrivée obligatoire,\neffectif initial réel)" as UC8
+    usecase "Affecter un lot à un bâtiment" as UC9
+  }
+
+  package "Saisies quotidiennes" {
+    usecase "Remplir la fiche quotidienne\n(Enregistrer / Annuler / Reformuler)" as UC10
+    usecase "Faire une saisie rapide\n(mortalité, aliment, véto,\ndépense, vente)" as UC11
+    usecase "Suivre le module pondeuses\n(œufs, plateaux/unités)" as UC12
+    usecase "Saisir hors ligne puis synchroniser" as UC13
+  }
+
+  package "Gestion et pilotage" {
+    usecase "Consulter stocks et prix\n(inventaire, historique)" as UC14
+    usecase "Consulter rapports et graphiques" as UC15
+    usecase "Exporter en PDF / Excel" as UC16
+    usecase "Gérer membres, rôles\net permissions" as UC17
+    usecase "Gérer les invitations\n(codes sécurisés, révocables)" as UC18
+  }
+
+  package "Services payants" {
+    usecase "Utiliser le chat IA\n(fiche à confirmer)" as UC19
+    usecase "Acheter / générer\nun business plan" as UC20
+    usecase "Payer par Mobile Money" as UC21
+  }
+}
+
+ELE --> UC1
+ELE --> UC3
+ELE --> UC5
+ELE --> UC6
+ELE --> UC10
+ELE --> UC11
+ELE --> UC12
+ELE --> UC13
+ELE --> UC14
+ELE --> UC15
+ELE --> UC16
+ELE --> UC19
+ELE --> UC20
+ELE --> UC21
+PDG --> UC17
+PDG --> UC18
+PDG --> UC7
+PDG --> UC8
+UC1 ..> UC2 : <<include>>
+UC4 ..> UC2 : <<include>>
+UC10 ..> UC13 : <<include>>
+UC11 ..> UC13 : <<include>>
+UC19 ..> SMS : <<extend>> vérification
+UC2 --> SMS
+UC4 --> SMS
+UC21 --> PAY
+UC19 --> IA
+UC20 --> IA
+SYS --> UC13 : synchronisation\nautomatique
+@enduml

@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "misAJourLe": "2026-10-31T02:50:18.486Z",
+  "depots": {
+    "BusinessFram": {
+      "nom": "BusinessFram",
+      "url": null,
+      "visibilite": "inconnue",
+      "branchePrincipale": null,
+      "dernierCommit": null,
+      "derniereSynchronisation": null,
+      "modificationsAPublier": {
+        "commits": 0,
+        "fichiers": 0
+      },
+      "operations": [
+        {
+          "date": "2026-10-31T02:50:18.486Z",
+          "operation": "creerDepot",
+          "statut": "succes",
+          "details": {
+            "url": "https://github.com/CHARMANTBISSEMOU/BusinessFram",
+            "visibilite": "public"
+          }
+        }
+      ]
+    }
+  }
+}

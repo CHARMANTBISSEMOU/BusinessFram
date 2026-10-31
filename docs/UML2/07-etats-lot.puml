@@ -1,0 +1,21 @@
+@startuml 07-etats-lot
+title États — Cycle de vie d'un lot (UML2)
+[*] --> Cree
+Cree : référence auto « LOT-001 »
+Cree : nom facultatif
+Cree : âge à l'arrivée obligatoire (jours/semaines)
+Cree : effectif initial = oiseaux réellement présents
+Cree --> Actif : date d'arrivée atteinte
+state Actif {
+  state "Phases du cycle" as P
+  P : J1–J14 Pré-démarrage
+  P : J15–J28 Démarrage
+  P : J29–42 Croissance
+  P : J43–J77 Finition
+  [*] --> P
+  P --> P : chaque jour : mortalités, aliments,\nvéto, ventes\n(effectif courant recalculé)
+}
+Actif --> Archive : fin de cycle (J77)\nou archivage manuel
+Archive : données conservées\npour les rapports et comparaisons
+Archive --> [*]
+@enduml

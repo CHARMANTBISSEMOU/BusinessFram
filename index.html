@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BusinessFram — Suivi des tâches</title>
+<style>
+:root{--vert:#2e7d32;--vert-clair:#e8f5e9;--orange:#ef6c00;--bleu:#1565c0;--gris:#607d8b;--rouge:#c62828;}
+*{box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif;}
+body{margin:0;background:#f4f6f4;color:#263238;}
+header{background:linear-gradient(120deg,#2e7d32,#66bb6a);color:#fff;padding:18px 22px;}
+header h1{margin:0;font-size:1.5rem;}
+header p{margin:6px 0 0;opacity:.95;}
+.conteneur{max-width:1100px;margin:0 auto;padding:16px;}
+.resume{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0;}
+.carte-mini{background:#fff;border-radius:10px;padding:10px 14px;box-shadow:0 1px 4px rgba(0,0,0,.12);min-width:135px;}
+.carte-mini b{display:block;font-size:1.25rem;}
+.carte-mini span{font-size:.82rem;color:#546e7a;}
+.barre{height:10px;background:#dfe7df;border-radius:6px;overflow:hidden;margin:8px 0 0;}
+.barre>i{display:block;height:100%;background:var(--vert);width:0;transition:width .3s;}
+.boite-outils{background:#fff;border-radius:10px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.12);margin:12px 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+select,input[type=text],input[type=password]{padding:7px 9px;border:1px solid #cfd8dc;border-radius:7px;}
+button{padding:7px 12px;border:0;border-radius:7px;background:var(--vert);color:#fff;cursor:pointer;font-size:.92rem;}
+button:hover{filter:brightness(1.08);}
+button.secondaire{background:var(--gris);}
+button.termine{background:var(--bleu);}
+button.annuler{background:var(--rouge);}
+.tache{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.12);padding:14px 16px;margin:12px 0;}
+.tache .entete{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.id{background:var(--vert-clair);color:var(--vert);font-weight:700;padding:3px 9px;border-radius:6px;font-size:.85rem;}
+.phase{color:#78909c;font-size:.82rem;}
+.tache h3{margin:8px 0 4px;}
+.detail{margin:4px 0;font-size:.95rem;}
+.criteres{font-size:.85rem;color:#546e7a;font-style:italic;margin:4px 0 10px;}
+.controles{display:flex;flex-wrap:wrap;gap:10px;align-items:center;border-top:1px dashed #e0e0e0;padding-top:10px;}
+.controles label{display:flex;align-items:center;gap:6px;font-size:.92rem;}
+textarea{width:100%;min-height:52px;margin-top:10px;padding:8px 10px;border:1px solid #cfd8dc;border-radius:8px;resize:vertical;}
+.badge{padding:3px 10px;border-radius:999px;font-size:.8rem;font-weight:600;}
+.badge.afaire{background:#eceff1;color:#455a64;}
+.badge.prise{background:#fff3e0;color:var(--orange);}
+.badge.terminee{background:#e8f5e9;color:var(--vert);}
+.etat-sync{font-size:.85rem;color:#546e7a;}
+details.panneau{background:#fff;border-radius:10px;padding:10px 14px;box-shadow:0 1px 4px rgba(0,0,0,.12);margin:12px 0;}
+details.panneau summary{cursor:pointer;font-weight:600;}
+details.panneau .ligne{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0;}
+code{background:#eceff1;padding:1px 5px;border-radius:4px;font-size:.85em;}
+</style>
+</head>
+<body>
+<header>
+  <h1>🐔 BusinessFram — Suivi des tâches</h1>
+  <p>Plateforme Avicole Intelligente · Projet à 4 développeurs · Prise en charge (P1-P4) → Terminer → Commentaire facultatif</p>
+</header>
+<div class="conteneur">
+  <section class="resume" id="resume"></section>
+  <div class="barre"><i id="barreProgression"></i></div>
+  <section class="boite-outils">
+    <select id="filtreStatut">
+      <option value="tous">Tous les statuts</option>
+      <option value="afaire">À faire</option>
+      <option value="prise">Prises en charge</option>
+      <option value="terminee">Terminées</option>
+    </select>
+    <select id="filtreQui">
+      <option value="tous">Tout le monde</option>
+      <option value="P1">P1</option>
+      <option value="P2">P2</option>
+      <option value="P3">P3</option>
+      <option value="P4">P4</option>
+      <option value="personne">Non prises en charge</option>
+    </select>
+    <input type="text" id="recherche" placeholder="🔍 Rechercher (T-015, sync, prix…)">
+    <button class="secondaire" id="btnExporter">Exporter</button>
+    <button class="secondaire" id="btnImporter">Importer</button>
+    <input type="file" id="fichierImport" accept="application/json" hidden>
+    <button class="annuler" id="btnReset">Réinitialiser</button>
+  </section>
+  <details class="panneau">
+    <summary>🔗 Synchronisation GitHub — pour que toute l'équipe voie l'avancement</summary>
+    <div class="ligne">
+      <input type="password" id="jetonGh" placeholder="Jeton GitHub (droits « repo » sur BusinessFram)" size="45">
+      <button id="btnSync">Synchroniser maintenant</button>
+      <span class="etat-sync" id="etatSync">Non connecté : l'état est enregistré sur cet appareil.</span>
+    </div>
+    <p class="etat-sync">Le jeton reste uniquement sur votre appareil. Sans jeton, utilisez <b>Exporter / Importer</b> pour partager l'état (fichier <code>etat-suivi.json</code>).</p>
+  </details>
+  <main id="listeTaches"></main>
+</div>
+<script>
+"use strict";
+/* BusinessFram — suivi des tâches (T-xxx = plan de développement) */
+const DEPOT = "CHARMANTBISSEMOU/BusinessFram";
+const FICHIER_ETAT = "etat-suivi.json";
+const CLE_STOCKAGE = "businessfram-suivi-v1";
+const CLE_JETON = "businessfram-gh-token";
+
+const TACHES = [
+ {id:"T-000",phase:"Phase 0 — Cadrage (tous)",titre:"Valider l'architecture technique",
+  detail:"Confirmer la stack : mobile React Native + Expo + TypeScript, backend Node.js + TypeScript + PostgreSQL, API REST versionnée, file de sync locale (SQLite). Alternative : 100 % Firebase/Firestore.",
+  criteres:"Décision écrite dans docs/architecture.md + schéma de base de données complet."},
+ {id:"T-001",phase:"Phase 0 — Cadrage (tous)",titre:"Mettre en place le dépôt Git",
+  detail:"Structure monorepo (apps/mobile/, server/, docs/), README, conventions Git, CI locale de tests, intégration de ce tableau de suivi.",
+  criteres:"npm test tourne sur tout le dépôt ; le tableau de suivi est accessible."},
+ {id:"T-002",phase:"Phase 0 — Cadrage (P1 + P2)",titre:"Glossaire et contrats d'API",
+  detail:"Écrire le glossaire (Lot = bande, exploitation = ferme, mouvement…) et le contrat d'API des échanges mobile ↔ serveur avant tout développement.",
+  criteres:"Document docs/api-contract.md approuvé par les 4."},
+ {id:"T-010",phase:"Phase 1 — Socle serveur (P1)",titre:"Authentification téléphone + mot de passe",
+  detail:"Inscription/connexion par téléphone + mot de passe ; vérification initiale par SMS (OTP) et récupération de compte par SMS ; pas de SMS à chaque connexion ; identifiant permanent unique côté serveur ; anti-force brute.",
+  criteres:"Scénarios inscription/connexion/récupération testés ; un OTP erroné ×5 est bloqué."},
+ {id:"T-011",phase:"Phase 1 — Socle serveur (P1)",titre:"API comptes & profil",
+  detail:"CRUD du profil (demandé après l'inscription, à la configuration de l'exploitation) ; sessions JWT ; suppression de compte.",
+  criteres:"Tests d'intégration API verts."},
+ {id:"T-012",phase:"Phase 1 — Socle serveur (P1)",titre:"API exploitations",
+  detail:"Nom obligatoire ; localisation GPS avec saisie manuelle possible ; plusieurs exploitations par compte ; droits d'accès par utilisateur.",
+  criteres:"Création de 2 exploitations sur un même compte testée."},
+ {id:"T-013",phase:"Phase 1 — Socle serveur (P1)",titre:"API bâtiments",
+  detail:"Gestion des bâtiments dès le départ ; affectation des lots aux bâtiments.",
+  criteres:"CRUD + affectation testés."},
+ {id:"T-014",phase:"Phase 1 — Socle serveur (P1)",titre:"API lots",
+  detail:"Nom facultatif + référence automatique LOT-001 si absent ; âge à l'arrivée obligatoire (jours ou semaines) + date d'arrivée ; effectif initial = oiseaux réellement présents ; effectif courant calculé à partir des mouvements.",
+  criteres:"Création sans nom → LOT-001 ; effectif courant = initial − mouvements."},
+ {id:"T-015",phase:"Phase 1 — Socle serveur (P1)",titre:"Moteur de synchronisation hors ligne",
+  detail:"File d'attente locale ; envoi automatique au retour d'Internet ; prévention des doublons (clés d'idempotence) ; détection des conflits + règle de résolution explicite ; opérations distinctes hors ligne toujours conservées.",
+  criteres:"2 modifications concurrentes résolues selon la règle ; aucun doublon ; aucune opération perdue."},
+ {id:"T-016",phase:"Phase 1 — Socle serveur (P1)",titre:"Sauvegardes & restauration",
+  detail:"Sauvegarde locale + serveur ; restauration après réinstallation ou changement de téléphone ; documenter la limite des données jamais synchronisées.",
+  criteres:"Test : suppression app → réinstallation → restauration des données synchronisées."},
+ {id:"T-017",phase:"Phase 1 — Socle serveur (P1)",titre:"Rôles & permissions",
+  detail:"Rôles PDG, responsable du suivi, comptable, contrôleur, vendeur, partenaire, invité ; permissions par ressource côté serveur ; invitations par téléphone ou code sécurisés, révocables, avec durée de validité. [À TRANCHER : permissions détaillées]",
+  criteres:"Matrice docs/permissions.md + tests d'accès refusés."},
+ {id:"T-020",phase:"Phase 2 — Mobile & saisies (P2)",titre:"Écrans exploitations / bâtiments / lots",
+  detail:"Création et gestion : exploitation (nom obligatoire, GPS + manuel), bâtiments, lots (nom facultatif, réf auto, âge à l'arrivée obligatoire, effectif initial réel) ; affectation lot → bâtiment.",
+  criteres:"Parcours complet jouable sur téléphone."},
+ {id:"T-021",phase:"Phase 2 — Mobile & saisies (P2)",titre:"Fiche quotidienne complète",
+  detail:"Toutes les rubriques de l'app existante en une fiche ; boutons explicites Enregistrer / Annuler / Reformuler ; aucune opération enregistrée sans « Enregistrer ».",
+  criteres:"Rien n'est écrit sans clic sur Enregistrer ; fiche du jour reprenable."},
+ {id:"T-022",phase:"Phase 2 — Mobile & saisies (P2)",titre:"Saisies rapides par opération",
+  detail:"Mortalités (nombre obligatoire, cause/obs facultatives, effectif recalculé) ; Aliments (réellement consommé, sacs ou kg, conversion si poids du sac connu, jamais d'estimation) ; Produits véto (nom + quantité, ajout catalogue) ; Achats véto (produit, qté, PU, date) ; Autres dépenses (catégorie, montant, date) ; Ventes volailles (qté, PU, date, total calculé, multi-ventes/jour).",
+  criteres:"Chaque opération testée unitairement ; total de vente calculé automatiquement."},
+ {id:"T-023",phase:"Phase 2 — Mobile & saisies (P2)",titre:"Module pondeuses",
+  detail:"Œufs produits, cassés/impropres, vendus, stock d'œufs, alimentation ; ventes en plateaux ou à l'unité ; contenance du plateau configurable ; conversion automatique quand connue.",
+  criteres:"Vente « 3 plateaux » convertie correctement quand la contenance est renseignée."},
+ {id:"T-024",phase:"Phase 2 — Mobile & saisies (P2)",titre:"Écrans de consultation",
+  detail:"Accueil, historique, archives, alertes (boutons accepter / refuser). [À TRANCHER plus tard : notifications]",
+  criteres:"Affichage correct des données déjà saisies."},
+ {id:"T-030",phase:"Phase 3 — Stocks & prix (P3)",titre:"Moteur de stocks automatiques",
+  detail:"Stocks calculés à partir des achats et consommations enregistrés (stock initial + tous les mouvements) ; inventaire physique comparable au stock théorique ; corrections tracées dans l'historique.",
+  criteres:"Test : achat +10, consommation −4 → stock 6 ; correction d'inventaire tracée."},
+ {id:"T-031",phase:"Phase 3 — Stocks & prix (P3)",titre:"Prix des aliments & historique",
+  detail:"Saisie manuelle des prix avec date d'application ; historique conservé ; les opérations passées utilisent le prix applicable à leur période ; aucun prix ne modifie rétroactivement les anciens calculs ; poids du sac configurable par produit (jamais 50 kg imposé).",
+  criteres:"Test : changer le prix aujourd'hui ne change pas les coûts du mois dernier."},
+ {id:"T-032",phase:"Phase 3 — Stocks & prix (P3)",titre:"Catalogues & unités",
+  detail:"Catalogue commun (produits, ingrédients, unités, catégories) personnalisable par exploitation ; les ajouts d'une exploitation ne modifient pas le catalogue commun ; anti-doublons ; cohérence des unités.",
+  criteres:"Ajout perso visible seulement pour l'exploitation ; doublon refusé."},
+ {id:"T-033",phase:"Phase 3 — Stocks & prix (P3)",titre:"Moteur financier",
+  detail:"Coûts, chiffre d'affaires, bénéfice estimé, rentabilité par lot ; fondés sur les mouvements enregistrés ; reproductibles et traçables ; distinction stricte saisies / calculées / estimées.",
+  criteres:"Calculs reproductibles à partir de l'historique des mouvements."},
+ {id:"T-040",phase:"Phase 4 — Rapports (P4)",titre:"Rapports de gestion",
+  detail:"Rapports sur effectifs, mortalités, alimentation, dépenses, achats, ventes et stocks.",
+  criteres:"Chaque rubrique a son rapport, fondé sur les données enregistrées."},
+ {id:"T-041",phase:"Phase 4 — Rapports (P4)",titre:"Rapports financiers & graphiques",
+  detail:"Coûts, CA, bénéfice estimé, rentabilité par lot, production des pondeuses ; graphiques d'évolution ; comparaisons entre lots/exploitations et entre prévisions et résultats réels (clairement distingués).",
+  criteres:"Estimations et réels visuellement distincts."},
+ {id:"T-042",phase:"Phase 4 — Rapports (P4)",titre:"Exports PDF / Excel",
+  detail:"Export des rapports en PDF et des données en Excel.",
+  criteres:"PDF et Excel corrects et ouvrables."},
+ {id:"T-050",phase:"Phase 5 — Services payants (P4 + P1)",titre:"Chat IA (500 FCFA/mois)",
+  detail:"Nécessite Internet ; l'IA prépare une fiche à confirmer dans le chat ; aucune opération enregistrée sans « Enregistrer » ; l'utilisateur peut annuler ou reformuler. [À TRANCHER : quota mensuel ou illimité]",
+  criteres:"Une fiche proposée par l'IA n'écrit rien sans confirmation."},
+ {id:"T-051",phase:"Phase 5 — Services payants (P4 + P1)",titre:"Générateur de business plans",
+  detail:"Chair : 1 000 FCFA / Pondeuses : 2 000 FCFA ; génération + modifications illimitées du document acheté ; un nouveau projet = un nouvel achat ; statistiques agrégées anonymisées + références externes vérifiées (source, date, région, unité, cohérence, échantillon, confiance) ; si références insuffisantes → le signaler, ne jamais inventer ; calculs par le moteur financier, l'IA explique ; aucune donnée individuelle exposée. [À TRANCHER : parcours formulaire vs chat IA]",
+  criteres:"Document généré avec sources citées ; achat = 1 projet ; modifs illimitées après achat."},
+ {id:"T-052",phase:"Phase 5 — Services payants (P4 + P1)",titre:"Paiements MTN MoMo & Orange Money",
+  detail:"MTN Mobile Money et Orange Money uniquement ; le serveur confirme le paiement avant d'activer le service ; historique des transactions conservé. [À TRANCHER : prestataire et process de confirmation]",
+  criteres:"Un paiement non confirmé n'active rien ; historique complet."},
+ {id:"T-060",phase:"Phase 6 — Qualité (tous)",titre:"Tests & QA croisée",
+  detail:"Tests unitaires (moteurs de calcul, sync, conflits), tests d'intégration API, tests mobile sur les parcours clés ; QA croisée P1↔P3 et P2↔P4.",
+  criteres:"Couverture des moteurs critiques ; zéro bug bloquant connu."},
+ {id:"T-061",phase:"Phase 6 — Qualité (tous)",titre:"Documentation",
+  detail:"Documentation technique (API, schéma de base de données) + guide utilisateur.",
+  criteres:"Docs à jour dans docs/."},
+ {id:"T-062",phase:"Phase 6 — Qualité (tous)",titre:"Recette finale",
+  detail:"Démo complète + validation des critères d'acceptation de chaque tâche.",
+  criteres:"PV de recette signé."}
+];
+/* ---------- État ---------- */
+let etat = chargerEtatLocal();
+let shaDistant = null;
+let minuteurPush = null;
+
+function vide(){ return {version:1, misAJourLe:null, taches:{}}; }
+
+function chargerEtatLocal(){
+  try{
+    const brut = localStorage.getItem(CLE_STOCKAGE);
+    if(brut) return JSON.parse(brut);
+  }catch(e){}
+  return vide();
+}
+
+function enregistrerLocal(){
+  etat.misAJourLe = new Date().toISOString();
+  localStorage.setItem(CLE_STOCKAGE, JSON.stringify(etat));
+  programmerPushDistant();
+}
+
+function entree(id){
+  if(!etat.taches[id]) etat.taches[id] = {statut:"afaire", qui:null, datePrise:null, dateFin:null, commentaire:""};
+  return etat.taches[id];
+}
+
+function horodatage(e){ return new Date(e.dateFin || e.datePrise || 0).getTime(); }
+
+function fusionner(distant){
+  if(!distant || !distant.taches) return;
+  for(const id of Object.keys(distant.taches)){
+    const d = distant.taches[id];
+    const l = etat.taches[id];
+    if(!l || horodatage(d) >= horodatage(l)) etat.taches[id] = d;
+  }
+  etat.misAJourLe = new Date().toISOString();
+  localStorage.setItem(CLE_STOCKAGE, JSON.stringify(etat));
+}
+
+/* ---------- Synchronisation GitHub (facultative) ---------- */
+function jeton(){ return localStorage.getItem(CLE_JETON) || ""; }
+
+function encoderB64(texte){
+  const bytes = new TextEncoder().encode(texte);
+  let binaire = "";
+  bytes.forEach(b => binaire += String.fromCharCode(b));
+  return btoa(binaire);
+}
+
+function decoderB64(b64){
+  const binaire = atob(b64.replace(/\s/g, ""));
+  const bytes = Uint8Array.from(binaire, c => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+function majEtatSync(texte, couleur){
+  const el = document.getElementById("etatSync");
+  el.textContent = texte;
+  el.style.color = couleur || "#546e7a";
+}
+
+async function recupererDistant(){
+  const t = jeton();
+  if(!t) return;
+  majEtatSync("Connexion à GitHub…");
+  try{
+    const r = await fetch(`https://api.github.com/repos/${DEPOT}/contents/${FICHIER_ETAT}`, {
+      headers: {Authorization: `Bearer ${t}`, Accept: "application/vnd.github+json"}
+    });
+    if(r.status === 404){
+      shaDistant = null;
+      majEtatSync("Connecté : aucun état distant encore enregistré.", "#2e7d32");
+      return;
+    }
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    shaDistant = data.sha;
+    fusionner(JSON.parse(decoderB64(data.content)));
+    renduComplet();
+    majEtatSync("Synchronisé avec GitHub ✔", "#2e7d32");
+  }catch(e){
+    majEtatSync("Échec de connexion GitHub : " + e.message, "#c62828");
+  }
+}
+
+function programmerPushDistant(){
+  if(!jeton()) return;
+  clearTimeout(minuteurPush);
+  minuteurPush = setTimeout(pousserDistant, 1500);
+}
+
+async function pousserDistant(){
+  const t = jeton();
+  if(!t) return;
+  const contenu = encoderB64(JSON.stringify(etat, null, 2));
+  try{
+    const corps = {message: "Mise à jour du suivi des tâches", content: contenu};
+    if(shaDistant) corps.sha = shaDistant;
+    const r = await fetch(`https://api.github.com/repos/${DEPOT}/contents/${FICHIER_ETAT}`, {
+      method: "PUT",
+      headers: {Authorization: `Bearer ${t}`, Accept: "application/vnd.github+json"},
+      body: JSON.stringify(corps)
+    });
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    shaDistant = data.content.sha;
+    majEtatSync("Synchronisé avec GitHub ✔", "#2e7d32");
+  }catch(e){
+    majEtatSync("Enregistrement distant impossible : " + e.message + " (état gardé localement)", "#c62828");
+  }
+}
+/* ---------- Rendu ---------- */
+function statutAffiche(e){
+  if(e.statut === "terminee") return {cls:"terminee", texte:`Terminée par ${e.qui || "?"}${e.dateFin ? " le " + new Date(e.dateFin).toLocaleDateString("fr-FR") : ""}`};
+  if(e.statut === "prise") return {cls:"prise", texte:`Prise en charge par ${e.qui || "?"}`};
+  return {cls:"afaire", texte:"À faire"};
+}
+
+function renduResume(){
+  const total = TACHES.length;
+  let term = 0;
+  const par = {P1:{prise:0,term:0}, P2:{prise:0,term:0}, P3:{prise:0,term:0}, P4:{prise:0,term:0}};
+  for(const t of TACHES){
+    const e = entree(t.id);
+    if(e.statut === "terminee") term++;
+    if(e.qui && par[e.qui]){
+      if(e.statut === "terminee") par[e.qui].term++;
+      else if(e.statut === "prise") par[e.qui].prise++;
+    }
+  }
+  const resume = document.getElementById("resume");
+  resume.innerHTML =
+    `<div class="carte-mini"><b>${term}/${total}</b><span>tâches terminées</span></div>` +
+    ["P1","P2","P3","P4"].map(p =>
+      `<div class="carte-mini"><b>${p}</b><span>${par[p].term} terminée(s) · ${par[p].prise} en cours</span></div>`).join("");
+  document.getElementById("barreProgression").style.width = Math.round(term / total * 100) + "%";
+}
+
+function visible(t, e){
+  const fs = document.getElementById("filtreStatut").value;
+  const fq = document.getElementById("filtreQui").value;
+  const q = document.getElementById("recherche").value.trim().toLowerCase();
+  if(fs !== "tous" && e.statut !== fs) return false;
+  if(fq === "personne" && e.qui) return false;
+  if(fq !== "tous" && fq !== "personne" && e.qui !== fq) return false;
+  if(q){
+    const texte = (t.id + " " + t.titre + " " + t.detail + " " + t.phase + " " + (e.commentaire || "")).toLowerCase();
+    if(!texte.includes(q)) return false;
+  }
+  return true;
+}
+
+function carteTache(t){
+  const e = entree(t.id);
+  const s = statutAffiche(e);
+  const div = document.createElement("section");
+  div.className = "tache";
+  div.id = "carte-" + t.id;
+  div.innerHTML = `
+    <div class="entete">
+      <span class="id">${t.id}</span>
+      <span class="phase">${t.phase}</span>
+      <span class="badge ${s.cls}">${s.texte}</span>
+    </div>
+    <h3>${t.titre}</h3>
+    <p class="detail">${t.detail}</p>
+    <p class="criteres">✅ Critères d'acceptation : ${t.criteres}</p>
+    <div class="controles">
+      <label><input type="checkbox" id="chk-${t.id}" ${e.statut !== "afaire" ? "checked" : ""}> Prise en charge</label>
+      <label>Je suis :
+        <select id="sel-${t.id}">
+          <option value="">— choisir —</option>
+          <option ${e.qui === "P1" ? "selected" : ""}>P1</option>
+          <option ${e.qui === "P2" ? "selected" : ""}>P2</option>
+          <option ${e.qui === "P3" ? "selected" : ""}>P3</option>
+          <option ${e.qui === "P4" ? "selected" : ""}>P4</option>
+        </select>
+      </label>
+      ${e.statut === "terminee"
+        ? `<button class="annuler" id="btn-${t.id}">Rouvrir</button>`
+        : e.statut === "prise"
+          ? `<button class="termine" id="btn-${t.id}">✔ Terminer</button>`
+          : ""}
+    </div>
+    <textarea id="txt-${t.id}" placeholder="Commentaire (facultatif)…">${e.commentaire || ""}</textarea>`;
+  div.querySelector("#chk-" + t.id).addEventListener("change", ev => {
+    const ent = entree(t.id);
+    if(ev.target.checked){
+      const sel = div.querySelector("#sel-" + t.id);
+      if(!sel.value){ ev.target.checked = false; alert("Choisissez d'abord qui vous êtes (P1, P2, P3 ou P4)."); sel.focus(); return; }
+      ent.statut = "prise";
+      ent.qui = sel.value;
+      ent.datePrise = new Date().toISOString();
+    }else{
+      if(!confirm("Annuler la prise en charge de " + t.id + " ?")){ ev.target.checked = true; return; }
+      ent.statut = "afaire"; ent.qui = null; ent.datePrise = null; ent.dateFin = null;
+    }
+    enregistrerLocal(); renduComplet();
+  });
+
+  div.querySelector("#sel-" + t.id).addEventListener("change", ev => {
+    const ent = entree(t.id);
+    if(ev.target.value && ent.statut !== "afaire"){ ent.qui = ev.target.value; enregistrerLocal(); renduComplet(); }
+  });
+
+  const btn = div.querySelector("#btn-" + t.id);
+  if(btn) btn.addEventListener("click", () => {
+    const ent = entree(t.id);
+    if(ent.statut === "prise"){
+      if(!confirm("Marquer " + t.id + " comme terminée ?")) return;
+      ent.statut = "terminee"; ent.dateFin = new Date().toISOString();
+    }else{
+      ent.statut = "prise"; ent.dateFin = null;
+    }
+    enregistrerLocal(); renduComplet();
+  });
+
+  div.querySelector("#txt-" + t.id).addEventListener("input", ev => {
+    entree(t.id).commentaire = ev.target.value;
+    enregistrerLocal();
+  });
+
+  return div;
+}
+
+function renduComplet(){
+  renduResume();
+  const liste = document.getElementById("listeTaches");
+  liste.innerHTML = "";
+  for(const t of TACHES){
+    const e = entree(t.id);
+    if(visible(t, e)) liste.appendChild(carteTache(t));
+  }
+}
+
+/* ---------- Export / Import ---------- */
+document.getElementById("btnExporter").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(etat, null, 2)], {type: "application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "etat-suivi.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+document.getElementById("btnImporter").addEventListener("click", () => document.getElementById("fichierImport").click());
+document.getElementById("fichierImport").addEventListener("change", ev => {
+  const f = ev.target.files[0];
+  if(!f) return;
+  const lecteur = new FileReader();
+  lecteur.onload = () => {
+    try{
+      fusionner(JSON.parse(lecteur.result));
+      enregistrerLocal();
+      renduComplet();
+    }catch(e){ alert("Fichier JSON invalide."); }
+  };
+  lecteur.readAsText(f);
+  ev.target.value = "";
+});
+
+document.getElementById("btnReset").addEventListener("click", () => {
+  if(!confirm("Réinitialiser TOUT le suivi sur cet appareil ? (utilisez Exporter pour sauvegarder avant)")) return;
+  etat = vide();
+  enregistrerLocal();
+  renduComplet();
+});
+
+document.getElementById("btnSync").addEventListener("click", async () => {
+  const t = document.getElementById("jetonGh").value.trim();
+  if(t){ localStorage.setItem(CLE_JETON, t); await recupererDistant(); }
+  else{ majEtatSync("Saisissez un jeton GitHub pour activer la synchronisation."); }
+});
+
+for(const id of ["filtreStatut", "filtreQui"]) document.getElementById(id).addEventListener("change", renduComplet);
+document.getElementById("recherche").addEventListener("input", renduComplet);
+
+/* ---------- Démarrage ---------- */
+document.getElementById("jetonGh").value = jeton();
+renduComplet();
+if(jeton()) recupererDistant();
+</script>
+</body>
+</html>
+
+
+
+
+

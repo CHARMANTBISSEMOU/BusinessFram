@@ -1,0 +1,56 @@
+@startuml 06-activite-saisie-rapide
+title Activité — Saisie rapide d'une opération (UML2)
+start
+:Éleveur ouvre « Saisie rapide »;
+:choisit le type d'opération;
+
+switch (type ?)
+case (Mortalité)
+  :saisit le nombre **(obligatoire)**;
+  :saisit cause et observation (facultatives);
+  :effectif restant **recalculé**\n(à partir des mouvements);
+case (Aliment)
+  :saisit la quantité **réellement consommée**;
+  :choisit l'unité : sacs ou kilogrammes;
+  if (poids du sac connu ?) then (oui)
+    :conversion automatique sacs ↔ kg;
+  else (non)
+    :saisie en kg, pas d'estimation automatique;
+  endif
+case (Produit vétérinaire)
+  :saisit nom + quantité;
+  if (produit absent du catalogue ?) then (oui)
+    :ajout possible au catalogue;
+  endif
+case (Achat vétérinaire)
+  :saisit produit, quantité, prix unitaire, date **uniquement**;
+case (Autre dépense)
+  :saisit catégorie (personnalisable),\nmontant FCFA, date **uniquement**;
+case (Vente volailles)
+  :saisit quantité, prix unitaire, date;
+  :total = quantité × prix **(calculé automatiquement)**;
+  note right : plusieurs ventes possibles le même jour
+case (Vente œufs)
+  :saisit quantité en plateaux ou à l'unité;
+  if (contenance du plateau connue ?) then (oui)
+    :conversion automatique vers l'unité;
+  else (non)
+    :saisie telle quelle;
+  endif
+endswitch
+
+:aperçu : données **saisies** vs **calculées** clairement séparées;
+if (Bouton « Enregistrer » pressé ?) then (oui)
+  :mise en file locale (clé d'idempotence);
+  if (Internet disponible ?) then (oui)
+    :envoi immédiat au serveur;
+  else (non)
+    :en attente dans la file → synchronisation\nautomatique au retour du réseau;
+  endif
+  :opération enregistrée et traçable;
+  stop
+else (non : Annuler / Reformuler)
+  :aucune donnée n'est écrite;
+  stop
+endif
+@enduml

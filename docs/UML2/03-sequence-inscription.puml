@@ -1,0 +1,40 @@
+@startuml 03-sequence-inscription
+title Séquence — Inscription et vérification par SMS (UML2)
+autonumber "1."
+actor "Éleveur" as ELE
+participant "App mobile\n(React Native / Expo)" as M
+participant "API /auth\n(Node.js)" as API
+participant "Passerelle SMS" as SMS
+database "Base serveur\n(PostgreSQL)" as DB
+
+ELE -> M : saisit téléphone + mot de passe
+M -> API : POST /auth/inscription
+API -> DB : vérifie l'unicité du téléphone
+alt téléphone déjà utilisé
+  API --> M : erreur « compte existant »
+else nouveau compte
+  API -> API : génère OTP + limite les tentatives (rate limiting)
+  API -> SMS : envoi du SMS de vérification
+  SMS --> ELE : code OTP (6 chiffres)
+  ELE -> M : saisit le code OTP
+  M -> API : POST /auth/verification
+  API -> DB : crée le Compte\n(identifiant permanent unique, UUID)
+  API --> M : session JWT (connexion ouverte)
+  M --> ELE : accès à la plateforme
+end
+
+note over API, DB
+  Le serveur fait autorité :
+  identifiant permanent, droits, paiements.
+  Pas de SMS à chaque connexion suivante.
+end note
+
+ELE -> M : oublie son mot de passe
+M -> API : POST /auth/recuperation
+API -> SMS : nouveau SMS OTP
+SMS --> ELE : code de récupération
+ELE -> M : saisit OTP + nouveau mot de passe
+M -> API : POST /auth/reinitialisation
+API -> DB : met à jour le hash du mot de passe
+API --> M : session JWT
+@enduml

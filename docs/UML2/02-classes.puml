@@ -1,0 +1,185 @@
+@startuml 02-classes
+title Diagramme de classes — Modèle du domaine (UML2)
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+package "Comptes et organisation" {
+  class Compte {
+    +idPermanent : UUID
+    +telephone : String
+    +motDePasseHash : String
+    +dateCreation : DateTime
+  }
+  class Profil {
+    +prenom : String
+    +dateConfiguration : DateTime
+  }
+  class Role {
+    +libelle : {PDG, ResponsableSuivi, Comptable,
+    | Contrôleur, Vendeur, Partenaire, Invité}
+  }
+  class Permission {
+    +ressource : String
+    +droit : {lecture, ecriture}
+  }
+  class Invitation {
+    +code : String
+    +type : {telephone, code}
+    +dateExpiration : DateTime
+    +revoquee : Boolean
+  }
+}
+
+package "Exploitation" {
+  class Exploitation {
+    +nom : String [1..1]
+    +latitude : Real [0..1]
+    +longitude : Real [0..1]
+    +adresseManuelle : String [0..1]
+  }
+  class Batiment {
+    +nom : String
+  }
+  class Lot {
+    +reference : String (auto « LOT-001 »)
+    +nom : String [0..1]
+    +dateArrivee : Date
+    +ageArrivee : Integer [1..1]
+    +uniteAge : {jours, semaines}
+    +effectifInitial : Integer [1..1]
+    +effectifCourant : Integer {calculé}
+    +statut : {actif, archive}
+  }
+}
+
+package "Saisies et opérations" {
+  abstract class Operation {
+    +date : Date
+    +creeHorsLigne : Boolean
+    +cleIdempotence : UUID
+    +version : Integer
+    +total : Real {calculé}
+  }
+  class FicheQuotidienne {
+    +date : Date
+    +enregistree : Boolean
+  }
+  class Mortalite {
+    +nombre : Integer [1..1]
+    +cause : String [0..1]
+    +observation : String [0..1]
+  }
+  class ConsommationAliment {
+    +quantite : Real
+    +unite : {sac, kg}
+  }
+  class UtilisationProduit {
+    +nomProduit : String
+    +quantite : Real
+  }
+  class AchatVeterinaire {
+    +produit : String
+    +quantite : Real
+    +prixUnitaire : Real
+    +date : Date
+  }
+  class AutreDepense {
+    +categorie : String
+    +montantFCFA : Real
+    +date : Date
+  }
+  class VenteVolaille {
+    +quantite : Integer
+    +prixUnitaire : Real
+    +date : Date
+  }
+  class VenteOeuf {
+    +quantite : Real
+    +unite : {oeuf, plateau}
+    +contenancePlateau : Integer [0..1]
+  }
+  class SuiviPonte {
+    +oeufsProduits : Integer [0..1]
+    +oeufsCasses : Integer [0..1]
+    +oeufsVendus : Integer [0..1]
+    +stockOeufs : Integer {calculé}
+  }
+}
+
+package "Stocks, prix, catalogues" {
+  class Catalogue {
+    +type : {commun, exploitation}
+  }
+  class Produit {
+    +nom : String
+    +unite : String
+    +poidsSac : Real [0..1] {configurable}
+  }
+  class PrixAliement {
+    +dateEffet : Date
+    +prixParIngredient : Map
+    +historique : Boolean
+  }
+  class MouvementStock {
+    +type : {achat, consommation, correction}
+    +quantite : Real
+    +date : Date
+  }
+  class Stock {
+    +quantiteTheorique : Real {calculée}
+    +quantitePhysique : Real [0..1]
+    +correctionTracee : Boolean
+  }
+}
+
+package "Monétisation" {
+  class TransactionPaiement {
+    +montant : Real
+    +operateur : {MTNMoMo, OrangeMoney}
+    +statut : {initiee, enAttente, confirmee, echouee, annulee}
+    +date : DateTime
+  }
+  class AbonnementChatIA {
+    +dateDebut : Date
+    +dateFin : Date
+  }
+  class AchatBusinessPlan {
+    +type : {chair, pondeuses}
+    +prix : Real (1000 | 2000 FCFA)
+    +modificationsIllimitees : Boolean
+  }
+  class BusinessPlan {
+    +document : String
+    +sourcesVerifiees : List
+    +avertissements : List
+  }
+}
+
+' ---- Relations ----
+Compte "1" -- "0..1" Profil : configure >
+Compte "1" -- "0..*" Exploitation : gère >
+Compte "1" -- "1" Role : possède >
+Role "1" -- "0..*" Permission : accorde >
+Exploitation "1" -- "0..*" Batiment : contient >
+Batiment "1" -- "0..*" Lot : héberge >
+Lot "1" -- "0..*" FicheQuotidienne : concerne >
+Lot "1" -- "0..*" Operation : enregistre >
+Lot "1" -- "0..*" MouvementStock : engendre >
+FicheQuotidienne "1" -- "0..*" Operation : regroupe >
+Operation <|-- Mortalite
+Operation <|-- ConsommationAliment
+Operation <|-- UtilisationProduit
+Operation <|-- AchatVeterinaire
+Operation <|-- AutreDepense
+Operation <|-- VenteVolaille
+Operation <|-- VenteOeuf
+Exploitation "1" -- "0..*" SuiviPonte : produit >
+Catalogue "1" -- "0..*" Produit : référence >
+Exploitation "1" -- "0..*" Catalogue : personnalise >
+Produit "1" -- "0..*" PrixAliement : a >
+MouvementStock "0..*" -- "1" Stock : alimente >
+TransactionPaiement "1" -- "0..1" AbonnementChatIA : active >
+TransactionPaiement "1" -- "0..1" AchatBusinessPlan : active >
+AchatBusinessPlan "1" -- "1" BusinessPlan : génère >
+Invitation "0..*" -- "1" Exploitation : donne accès à >
+@enduml

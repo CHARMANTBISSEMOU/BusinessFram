@@ -1,0 +1,38 @@
+@startuml 05-sequence-paiement
+title Séquence — Paiement Mobile Money et activation du service (UML2)
+autonumber "1."
+actor "Éleveur" as ELE
+participant "App mobile" as M
+participant "API /paiements" as API
+participant "Service de paiement" as PAY
+participant "Opérateur\nMTN MoMo / Orange Money" as OPS
+database "Base serveur" as DB
+
+ELE -> M : choisit un service payant\n(chat IA 500 F/mois | BP chair 1 000 F | BP pondeuses 2 000 F)
+M -> API : POST /paiements (service, opérateur)
+API -> DB : crée la Transaction (statut « initiée »)
+API -> PAY : demande de paiement
+PAY -> OPS : encaissement Mobile Money
+OPS --> ELE : confirmation sur le téléphone (USSD / app opérateur)
+ELE -> OPS : valide le paiement
+OPS -> PAY : notification de paiement
+PAY -> API : callback de confirmation (signé)
+API -> DB : vérifie et passe la transaction à « confirmée »
+API -> DB : ACTIVE le service\n(abonnement chat IA OU achat business plan)
+API -> DB : historise la transaction (montant, date, opérateur)
+API --> M : « Service activé »
+M --> ELE : accès au service payant
+
+note over API, OPS
+  RÈGLE : le serveur n'active JAMAIS un service
+  sans confirmation de paiement.
+  Tout est conservé dans l'historique des transactions.
+end note
+
+alt callback absent ou paiement refusé
+  OPS --> PAY : échec / délai dépassé
+  PAY -> API : notification d'échec
+  API -> DB : transaction « échouée » (aucune activation)
+  API --> M : « Paiement non confirmé — réessayez »
+end
+@enduml

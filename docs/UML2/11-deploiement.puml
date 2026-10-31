@@ -1,0 +1,41 @@
+@startuml 11-deploiement
+title Déploiement — Infrastructure technique (UML2)
+skinparam nodeStyle rectangle
+
+node "Téléphone de l'éleveur\n(Android / iOS)" as PHONE {
+  [App mobile Expo\n(React Native + TypeScript)] as APP
+  [Base locale SQLite\n(hors ligne + file de sync)] as LOC
+  APP --- LOC
+}
+
+node "Serveur applicatif\n(Node.js + TypeScript)" as SRV {
+  [API REST + services\n(auth, sync, stocks, finance,\npaiement, IA, business plans)] as API
+}
+
+node "Serveur de base de données" as DBS {
+  database "PostgreSQL" as DB
+  [Sauvegardes\n(restore après changement de téléphone)] as BCK
+  DB --- BCK
+}
+
+node "Services externes" as EXT {
+  [Passerelle SMS\n(OTP, récupération de compte)] as SMS
+  [MTN Mobile Money] as MTN
+  [Orange Money] as ORG
+  [Fournisseur IA] as LLM
+}
+
+cloud "GitHub Pages" as GH {
+  [Tableau HTML de suivi des tâches\n(prise en charge P1–P4, terminer, commentaires)] as TRACK
+}
+
+PHONE --> SRV : HTTPS\n(synchronisation automatique\nau retour du réseau)
+SRV --> DBS : connexion sécurisée
+SRV --> SMS : envoi d'OTP
+SRV --> MTN : encaissement + confirmation
+SRV --> ORG : encaissement + confirmation
+SRV --> LLM : chat IA / business plans
+person "Équipe P1–P4" as DEV
+DEV --> GH : consulte et met à jour\nle suivi du projet
+DEV --> SRV : déploiement
+@enduml
